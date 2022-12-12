@@ -36,14 +36,18 @@ MountPoints& MountPoints::self()
 
 volumes_list_t MountPoints::getNormalVolumes() const
 {
+#ifdef Q_OS_WIN
+     return (_mountedVolumes);
+#endif
+#if Q_OS_UNIX
     volumes_list_t normalVolumes;
-
     foreach (QStorageInfo volume, _mountedVolumes)
     {
         if ( !isSystemMount(volume) && !isSnapPackage(volume) && isValidVolume(volume))
             normalVolumes.append(volume);
     }
     return (normalVolumes);
+#endif
 }
 
 // ****** PUBLIC SLOTS *******

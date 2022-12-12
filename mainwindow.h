@@ -1,9 +1,13 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "fstatistics.h"
+
 #include <QMainWindow>
 #include <QFileSystemModel>
 #include <QFileIconProvider>
+#include <QItemSelection>
+#include <QChart>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -20,10 +24,15 @@ public:
 private slots:
     void onRefreshButtonClicked();
     void onCbDiskIndexChanged(int index);
+    void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+    void redrawChartView();
 
 private:
-    Ui::MainWindow    *ui;
-    QFileSystemModel  *fsModel;
-    QFileIconProvider iconProvider;
+    Ui::MainWindow      *ui;
+    QFileIconProvider   iconProvider;
+    QFileSystemModel    *fsModel;
+    QItemSelectionModel *selectionModel;
+    FStatistics         statistics;
+    QChart              currentChart;
 };
 #endif // MAINWINDOW_H

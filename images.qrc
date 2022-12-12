@@ -1,5 +1,8 @@
 <RCC>
-    <qresource prefix="/prefix">
+    <qresource prefix="/pref">
         <file>refresh.png</file>
+        <file>chart.png</file>
+        <file>pizza.png</file>
+        <file>FSeek.png</file>
     </qresource>
 </RCC>
