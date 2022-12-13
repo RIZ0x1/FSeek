@@ -17,6 +17,11 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    enum class ChartType {
+        Bar,
+        Pie
+    };
+
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -26,6 +31,10 @@ private slots:
     void onCbDiskIndexChanged(int index);
     void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void redrawChartView();
+    void redrawTableView();
+
+    void onButtonBarClicked();
+    void onButtonPieClicked();
 
 private:
     Ui::MainWindow      *ui;
@@ -34,5 +43,6 @@ private:
     QItemSelectionModel *selectionModel;
     FStatistics         statistics;
     QChart              currentChart;
+    ChartType           chartType;
 };
 #endif // MAINWINDOW_H

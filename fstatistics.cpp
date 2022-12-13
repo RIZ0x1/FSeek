@@ -2,68 +2,79 @@
 
 #include <QDirIterator>
 #include <QBarSet>
+#include <QtAlgorithms>
 
-using extention_statistics_t = QMap<QString, quint32>;
+using statistics_map = std::map<QString, quint32>;
+using important_statistics_vector = std::vector<QString, quint32>;
 
 void FStatistics::refresh(const QString& directory)
 {
-    _stat.clear();
-    directoriesCounter = 0;
+    _all_stat.clear();
+    _directoriesCounter = 0;
 
     QDirIterator itDir(directory, QDirIterator::Subdirectories);
-
     while ( itDir.hasNext() )
     {
         QFileInfo fileInfo = itDir.nextFileInfo();
         if ( ! fileInfo.isDir() )
         {
             QString key = fileInfo.suffix();
-            if ( ! _stat.contains(key) )
-                _stat[key] = 1;
+            if ( !_all_stat.count(key) )
+                _all_stat[key] = 1;
             else
-                ( _stat[key]++ );
+                ( _all_stat[key]++ );
         }
         else
-            (directoriesCounter++);
+            (_directoriesCounter++);
     }
 
-    qDebug() << "Size: " << _stat.size();
-    qDebug() << "Directories: " << directoriesCounter;
+    qDebug() << "Size: " << _all_stat.size();
+    qDebug() << "Directories: " << _directoriesCounter;
 
-    QMapIterator<QString,quint32> it(_stat);
-    while ( it.hasNext() )
-        qDebug() << it.next().key() << " -> " << it.value();
+    for (auto& it : _all_stat)
+        qDebug() << it.first << " -> " << it.second;
 }
 
-extention_statistics_t FStatistics::getStatistics() const
+statistics_map FStatistics::getStatistics() const
 {
-    return (_stat);
+    return (_all_stat);
 }
 
 QPieSeries* FStatistics::getPieSeries() const
 {
-    QPieSeries* series = new QPieSeries();
-    QMapIterator<QString, quint32> it(_stat);
+    const quint32 importantSize = std::min(MAX_IMPORTANT_SIZE, _all_stat.size());
+    important_statistics_vector top(importantSize);
 
-    while ( it.hasNext() )
+    std::partial_sort_copy(_all_stat.begin(), _all_stat.end(),
+                           top.begin(), top.end(),
+                           [](const Pair& lhs, const Pair& rhs){ return lhs.second > rhs.second; });
+
+    QPieSeries* series = new QPieSeries();
+    for (auto& set : top)
     {
-        QPieSlice *pieSlice = new QPieSlice(it.next().key(), it.value());
+        QPieSlice *pieSlice = new QPieSlice(set.first, set.second);
         series->append(pieSlice);
     }
-
     return (series);
 }
 
 QBarSeries* FStatistics::getBarSeries() const
 {
-    QBarSeries* series = new QBarSeries();
-    QMapIterator<QString, quint32> it(_stat);
+    const quint32 importantSize = std::min(MAX_IMPORTANT_SIZE, _all_stat.size());
+    important_statistics_vector top(importantSize);
 
-    while ( it.hasNext() )
+    std::partial_sort_copy(_all_stat.begin(), _all_stat.end(),
+                           top.begin(), top.end(),
+                           [](const Pair& lhs, const Pair& rhs){ return lhs.second > rhs.second; });
+
+    QBarSeries* series = new QBarSeries();
+    for (auto& set : top)
     {
-        QBarSet *barSet = new QBarSet(it.next().key());
-        *barSet << it.value();
+        QBarSet *barSet = new QBarSet(set.first);
+        *barSet << set.second;
         series->append(barSet);
     }
     return (series);
 }
+
+// *********************** PRIVATE MEMBERS **************************
