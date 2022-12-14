@@ -71,6 +71,7 @@ void MainWindow::onSelectionChanged(const QItemSelection& selected, const QItemS
         QString dir = fileInfo.filePath();
         statistics.refresh(dir);
         redrawChartView();
+        redrawTableView();
     }
     else
     {
@@ -99,7 +100,18 @@ void MainWindow::redrawChartView()
 
 void MainWindow::redrawTableView()
 {
+    ui->tableWidget->clearContents();
 
+    int i = 0;
+    for (auto& format : statistics.getStatistics())
+    {
+        ui->tableWidget->setRowCount(statistics.getStatistics().size());
+        ui->tableWidget->setItem(i, 0, new QTableWidgetItem(format.first));
+        ui->tableWidget->setItem(i, 1, new QTableWidgetItem( QString::number(format.second.count) ));
+        ui->tableWidget->setItem(i, 2, new QTableWidgetItem( QString::number(format.second.size) ));
+        ui->tableWidget->setItem(i, 3, new QTableWidgetItem( QString::number(format.second.size / format.second.count) ));
+        (i++);
+    }
 }
 
 void MainWindow::onButtonBarClicked()

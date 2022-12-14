@@ -7,29 +7,36 @@
 #include <QBarSeries>
 #include <QMap>
 
+struct FileFormatInfo
+{
+    unsigned int count = 0;
+    unsigned int size = 0;
+};
+
 class FStatistics : public QObject
 {
     Q_OBJECT
 
-    using Pair = std::pair<QString, quint32>;
-    using statistics_map = std::map<QString, quint32>;
-    using statistics_map_iterator = std::map<QString, quint32>::iterator;
+public:
+    using Pair = std::pair<QString, FileFormatInfo>;
+    using statistics_map = std::map<QString, FileFormatInfo>;
+    using statistics_map_iterator = std::map<QString, FileFormatInfo>::iterator;
     using important_statistics_vector = std::vector<Pair>;
 
+    FStatistics();
+    ~FStatistics() = default;
+
+    void                   refresh(const QString& directory);
+    QPieSeries*            getPieSeries() const;
+    QBarSeries*            getBarSeries() const;
+    statistics_map&        getStatistics();
+
+private:
     const statistics_map::size_type MAX_IMPORTANT_SIZE = 8;
     statistics_map                  _all_stat;
     quint32                         _directoriesCounter;
 
-//    important_statistics_vector getImportant();
-
-public:
-    FStatistics() : _directoriesCounter(0) {}
-    ~FStatistics() = default;
-
-    void                   refresh(const QString& directory);
-    statistics_map         getStatistics() const;
-    QPieSeries*            getPieSeries() const;
-    QBarSeries*            getBarSeries() const;
+    //    important_statistics_vector getImportant();
 
 };
 
