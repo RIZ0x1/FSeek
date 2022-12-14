@@ -2,6 +2,7 @@
 #define FSTATISTICS_H
 
 #include <QObject>
+#include <QThread>
 #include <QString>
 #include <QPieSeries>
 #include <QBarSeries>
@@ -12,6 +13,8 @@ struct FileFormatInfo
     unsigned int count = 0;
     unsigned int size = 0;
 };
+
+class WorkerThread;
 
 class FStatistics : public QObject
 {
@@ -26,18 +29,37 @@ public:
     FStatistics();
     ~FStatistics() = default;
 
-    void                   refresh(const QString& directory);
-    QPieSeries*            getPieSeries() const;
-    QBarSeries*            getBarSeries() const;
-    statistics_map&        getStatistics();
+    void             refresh(const QString& directory);
+    QPieSeries*      getPieSeries() const;
+    QBarSeries*      getBarSeries() const;
+    statistics_map&  getStatistics();
 
 private:
     const statistics_map::size_type MAX_IMPORTANT_SIZE = 8;
-    statistics_map                  _all_stat;
+    WorkerThread                    *_workerThread;
+    statistics_map                  *_statistics;
     quint32                         _directoriesCounter;
 
-    //    important_statistics_vector getImportant();
+    important_statistics_vector     getImportant() const;
 
+private slots:
+    void getResult(FStatistics::statistics_map* statistics, quint32 directoriesCounter);
+
+signals:
+    void resultReady();
+};
+
+class WorkerThread : public QThread
+{
+    Q_OBJECT
+    QString directory;
+
+    void run() override;
+public:
+    WorkerThread(const QString& directory) : directory(directory) {}
+
+signals:
+    void resultReady(FStatistics::statistics_map* statistics, quint32 directoriesCounter);
 };
 
 #endif // FSTATISTICS_H

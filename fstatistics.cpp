@@ -5,55 +5,56 @@
 #include <QtAlgorithms>
 
 using statistics_map = FStatistics::statistics_map;
+using important_statistics_vector = FStatistics::important_statistics_vector;
 
 FStatistics::FStatistics()
 {
     _directoriesCounter = 0;
+    _statistics = nullptr;
+    _workerThread = nullptr;
 }
 
 void FStatistics::refresh(const QString& directory)
 {
-    _all_stat.clear();
-    _directoriesCounter = 0;
+    if (_workerThread && _workerThread->isRunning() )
+        _workerThread->requestInterruption();
 
-    QDirIterator itDir(directory, QDirIterator::Subdirectories);
-    while ( itDir.hasNext() )
-    {
-        QFileInfo fileInfo = itDir.nextFileInfo();
-        if ( ! fileInfo.isDir() )
-        {
-            QString key = fileInfo.suffix();
-            _all_stat[key].size += fileInfo.size();
-            ( _all_stat[key].count++ );
-        }
-        else
-            (_directoriesCounter++);
-    }
+    _workerThread = new WorkerThread(directory);
+    connect(_workerThread, &WorkerThread::resultReady, this, &FStatistics::getResult);
+    connect(_workerThread, &WorkerThread::finished, _workerThread, &QObject::deleteLater);
+    _workerThread->start();
 
-    qDebug() << "Size: " << _all_stat.size();
-    qDebug() << "Directories: " << _directoriesCounter;
+//    qDebug() << "Size: " << _all_stat.size();
+//    qDebug() << "Directories: " << _directoriesCounter;
 
-    for (auto& it : _all_stat)
-        qDebug() << it.first << " -> " << it.second.count;
+//    for (auto& it : _all_stat)
+//        qDebug() << it.first << " -> " << it.second.count;
 }
 
 statistics_map& FStatistics::getStatistics()
 {
-    return (_all_stat);
+    return ( *_statistics );
+}
+
+important_statistics_vector FStatistics::getImportant() const
+{
+    if (_statistics == nullptr)
+        return important_statistics_vector();
+
+    const quint32 importantSize = std::min(MAX_IMPORTANT_SIZE, _statistics->size());
+    important_statistics_vector important(importantSize);
+
+    std::partial_sort_copy(_statistics->begin(), _statistics->end(),
+                           important.begin(), important.end(),
+                           [](const Pair& lhs, const Pair& rhs)
+                           { return lhs.second.count > rhs.second.count; });
+    return (important);
 }
 
 QPieSeries* FStatistics::getPieSeries() const
 {
-    const quint32 importantSize = std::min(MAX_IMPORTANT_SIZE, _all_stat.size());
-    important_statistics_vector top(importantSize);
-
-    std::partial_sort_copy(_all_stat.begin(), _all_stat.end(),
-                           top.begin(), top.end(),
-                           [](const Pair& lhs, const Pair& rhs)
-                           { return lhs.second.count > rhs.second.count; });
-
     QPieSeries* series = new QPieSeries();
-    for (auto& set : top)
+    for (auto& set : getImportant())
     {
         QPieSlice *pieSlice = new QPieSlice(set.first, set.second.count);
         series->append(pieSlice);
@@ -63,16 +64,8 @@ QPieSeries* FStatistics::getPieSeries() const
 
 QBarSeries* FStatistics::getBarSeries() const
 {
-    const quint32 importantSize = std::min(MAX_IMPORTANT_SIZE, _all_stat.size());
-    important_statistics_vector top(importantSize);
-
-    std::partial_sort_copy(_all_stat.begin(), _all_stat.end(),
-                           top.begin(), top.end(),
-                           [](const Pair& lhs, const Pair& rhs)
-                           { return lhs.second.count > rhs.second.count; });
-
     QBarSeries* series = new QBarSeries();
-    for (auto& set : top)
+    for (auto& set : getImportant())
     {
         QBarSet *barSet = new QBarSet(set.first);
         *barSet << set.second.count;
@@ -81,4 +74,42 @@ QBarSeries* FStatistics::getBarSeries() const
     return (series);
 }
 
-// *********************** PRIVATE MEMBERS **************************
+void FStatistics::getResult(FStatistics::statistics_map* statistics, quint32 directoriesCounter)
+{
+    _statistics = statistics;
+    _directoriesCounter = directoriesCounter;
+    _workerThread = nullptr;
+    emit resultReady();
+}
+
+// *****************************************************
+// ****************** WorkerThread *********************
+// *****************************************************
+
+void WorkerThread::run()
+{
+    statistics_map *statistics = new statistics_map;
+    statistics_map &stat = *statistics;
+    quint32        directoriesCounter = 0;
+
+    QDirIterator itDir(directory, QDirIterator::Subdirectories);
+    while ( itDir.hasNext() )
+    {
+        if ( QThread::isInterruptionRequested() )
+        {
+            delete statistics;
+            return ;
+        }
+
+        QFileInfo fileInfo = itDir.nextFileInfo();
+        if ( ! fileInfo.isDir() )
+        {
+            QString key = fileInfo.suffix();
+            stat[key].size += fileInfo.size();
+            ( stat[key].count++ );
+        }
+        else
+            (directoriesCounter++);
+    }
+    emit resultReady(statistics, directoriesCounter);
+}

@@ -22,11 +22,15 @@ MainWindow::MainWindow(QWidget *parent)
     selectionModel = new QItemSelectionModel();
     ui->treeView->setSelectionModel(selectionModel);
 
+    ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
     connect(ui->refreshButton, &QPushButton::clicked, this, &MainWindow::onRefreshButtonClicked);
     connect(ui->cbDisk, &QComboBox::currentIndexChanged, this, &MainWindow::onCbDiskIndexChanged);
     connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &MainWindow::onSelectionChanged);
     connect(ui->buttonChart, &QPushButton::clicked, this, &MainWindow::onButtonBarClicked);
     connect(ui->buttonPie, &QPushButton::clicked, this, &MainWindow::onButtonPieClicked);
+    connect(&statistics, &FStatistics::resultReady, this, &MainWindow::redrawChartView);
+    connect(&statistics, &FStatistics::resultReady, this, &MainWindow::redrawTableView);
     emit ui->refreshButton->clicked();
 }
 
@@ -70,8 +74,6 @@ void MainWindow::onSelectionChanged(const QItemSelection& selected, const QItemS
     {
         QString dir = fileInfo.filePath();
         statistics.refresh(dir);
-        redrawChartView();
-        redrawTableView();
     }
     else
     {
@@ -95,12 +97,13 @@ void MainWindow::redrawChartView()
     }
     else
         return ;
-    ui->chartsWidget->setChart(&currentChart);
 }
 
 void MainWindow::redrawTableView()
 {
     ui->tableWidget->clearContents();
+
+    QLocale locale;
 
     int i = 0;
     for (auto& format : statistics.getStatistics())
@@ -108,8 +111,8 @@ void MainWindow::redrawTableView()
         ui->tableWidget->setRowCount(statistics.getStatistics().size());
         ui->tableWidget->setItem(i, 0, new QTableWidgetItem(format.first));
         ui->tableWidget->setItem(i, 1, new QTableWidgetItem( QString::number(format.second.count) ));
-        ui->tableWidget->setItem(i, 2, new QTableWidgetItem( QString::number(format.second.size) ));
-        ui->tableWidget->setItem(i, 3, new QTableWidgetItem( QString::number(format.second.size / format.second.count) ));
+        ui->tableWidget->setItem(i, 2, new QTableWidgetItem( locale.formattedDataSize(format.second.size, QLocale::DataSizeTraditionalFormat) ));
+        ui->tableWidget->setItem(i, 3, new QTableWidgetItem( locale.formattedDataSize(format.second.size / format.second.count) ));
         (i++);
     }
 }

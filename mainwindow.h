@@ -42,7 +42,6 @@ private:
     QFileSystemModel    *fsModel;
     QItemSelectionModel *selectionModel;
     FStatistics         statistics;
-    QChart              currentChart;
     ChartType           chartType;
 };
 #endif // MAINWINDOW_H
