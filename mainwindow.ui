@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="images.qrc">
-    <normaloff>:/pref/FSeek.png</normaloff>:/pref/FSeek.png</iconset>
+    <normaloff>:/pref/Imgs/FSeek.png</normaloff>:/pref/Imgs/FSeek.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -66,7 +66,7 @@
           </property>
           <property name="icon">
            <iconset resource="images.qrc">
-            <normaloff>:/pref/refresh.png</normaloff>:/pref/refresh.png</iconset>
+            <normaloff>:/pref/Imgs/refresh.png</normaloff>:/pref/Imgs/refresh.png</iconset>
           </property>
           <property name="flat">
            <bool>true</bool>
@@ -173,7 +173,7 @@
                </property>
                <property name="icon">
                 <iconset resource="images.qrc">
-                 <normaloff>:/pref/chart.png</normaloff>:/pref/chart.png</iconset>
+                 <normaloff>:/pref/Imgs/chart.png</normaloff>:/pref/Imgs/chart.png</iconset>
                </property>
                <property name="checkable">
                 <bool>false</bool>
@@ -199,7 +199,7 @@
                </property>
                <property name="icon">
                 <iconset resource="images.qrc">
-                 <normaloff>:/pref/pizza.png</normaloff>:/pref/pizza.png</iconset>
+                 <normaloff>:/pref/Imgs/pizza.png</normaloff>:/pref/Imgs/pizza.png</iconset>
                </property>
                <property name="checkable">
                 <bool>false</bool>

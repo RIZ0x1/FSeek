@@ -2,7 +2,6 @@
 
 #include <QDirIterator>
 #include <QBarSet>
-#include <QtAlgorithms>
 
 using statistics_map = FStatistics::statistics_map;
 using important_statistics_vector = FStatistics::important_statistics_vector;
@@ -91,6 +90,7 @@ void WorkerThread::run()
     {
         if ( QThread::isInterruptionRequested() )
         {
+            statistics->clear();
             delete statistics;
             return ;
         }

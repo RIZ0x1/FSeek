@@ -36,6 +36,7 @@ public:
 
 private:
     const statistics_map::size_type MAX_IMPORTANT_SIZE = 8;
+
     WorkerThread                    *_workerThread;
     statistics_map                  *_statistics;
     quint32                         _directoriesCounter;
@@ -54,10 +55,10 @@ class WorkerThread : public QThread
     Q_OBJECT
     QString directory;
 
-    void run() override;
 public:
     WorkerThread(const QString& directory) : directory(directory) {}
-
+private:
+    void run() override;
 signals:
     void resultReady(FStatistics::statistics_map* statistics, quint32 directoriesCounter);
 };

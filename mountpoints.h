@@ -16,10 +16,10 @@ class MountPoints : public QObject
     MountPoints() = default;
     virtual ~MountPoints() = default;
 
-    bool isSystemMount(const QStorageInfo& storage) const;
-    bool isDuplicate(const QStorageInfo& storage) const;
-    bool isSnapPackage(const QStorageInfo& storage) const;
-    bool isValidVolume(const QStorageInfo& storage) const;
+    bool isSystemMount(const QStorageInfo& storage) const; // *
+    bool isDuplicate(const QStorageInfo& storage) const;   // * Most of these methods
+    bool isSnapPackage(const QStorageInfo& storage) const; // * are for linux
+    bool isValidVolume(const QStorageInfo& storage) const; // *
 
 public:
     static MountPoints&  self();

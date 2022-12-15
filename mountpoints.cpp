@@ -26,7 +26,7 @@ bool MountPoints::isValidVolume(const QStorageInfo& storage) const
     return ((storage.blockSize() > 0) && !(storage.fileSystemType().toLower() == "autofs") );
 }
 
-// ****** PUBLIC METHODS *******
+// ****** PUBLIC *******
 
 MountPoints& MountPoints::self()
 {
@@ -49,8 +49,6 @@ volumes_list_t MountPoints::getNormalVolumes() const
     return (normalVolumes);
 #endif
 }
-
-// ****** PUBLIC SLOTS *******
 
 void MountPoints::refreshMountedVolumes()
 {

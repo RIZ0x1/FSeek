@@ -12,10 +12,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     chartType = ChartType::Bar;
+
     fsModel = new QFileSystemModel(this);
     fsModel->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
     fsModel->setIconProvider(&iconProvider);
     ui->treeView->setModel(fsModel);
+
     for (int i = 1; i < fsModel->columnCount(); ++i)
         ui->treeView->hideColumn(i);
 
@@ -36,10 +38,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-// ****************************************************************************
-
 void MainWindow::onRefreshButtonClicked()
 {
+    ui->statusbar->showMessage("Building directory tree");
+
     MountPoints::self().refreshMountedVolumes();
     ui->cbDisk->clear();
 
@@ -50,6 +52,8 @@ void MainWindow::onRefreshButtonClicked()
 
     if (ui->cbDisk->count() == 0)
         ui->cbDisk->setPlaceholderText("No available volumes");
+
+    ui->statusbar->clearMessage();
 }
 
 void MainWindow::onCbDiskIndexChanged(int)
@@ -69,6 +73,7 @@ void MainWindow::onSelectionChanged(const QItemSelection& selected, const QItemS
 
     if (fileInfo.isDir() && fileInfo.isReadable())
     {
+        ui->statusbar->showMessage("Loading \"" + fileInfo.fileName() + "\" directory statistics");
         QString dir = fileInfo.filePath();
         statistics.refresh(dir);
     }
@@ -92,8 +97,8 @@ void MainWindow::redrawChartView()
         QPieSeries* series = statistics.getPieSeries();
         ui->chartsWidget->chart()->addSeries(series);
     }
-    else
-        return ;
+
+    ui->statusbar->showMessage("Done", 1000);
 }
 
 void MainWindow::redrawTableView()
@@ -112,6 +117,8 @@ void MainWindow::redrawTableView()
         ui->tableWidget->setItem(i, 3, new QTableWidgetItem( locale.formattedDataSize(format.second.size / format.second.count) ));
         (i++);
     }
+
+    ui->statusbar->showMessage("Done", 1000);
 }
 
 void MainWindow::onButtonBarClicked()
