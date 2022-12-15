@@ -19,9 +19,6 @@ MainWindow::MainWindow(QWidget *parent)
     for (int i = 1; i < fsModel->columnCount(); ++i)
         ui->treeView->hideColumn(i);
 
-    selectionModel = new QItemSelectionModel();
-    ui->treeView->setSelectionModel(selectionModel);
-
     ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     connect(ui->refreshButton, &QPushButton::clicked, this, &MainWindow::onRefreshButtonClicked);

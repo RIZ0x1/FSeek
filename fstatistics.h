@@ -8,13 +8,13 @@
 #include <QBarSeries>
 #include <QMap>
 
+class WorkerThread;
+
 struct FileFormatInfo
 {
     unsigned int count = 0;
     unsigned int size = 0;
 };
-
-class WorkerThread;
 
 class FStatistics : public QObject
 {

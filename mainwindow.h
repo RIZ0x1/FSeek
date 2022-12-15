@@ -40,7 +40,6 @@ private:
     Ui::MainWindow      *ui;
     QFileIconProvider   iconProvider;
     QFileSystemModel    *fsModel;
-    QItemSelectionModel *selectionModel;
     FStatistics         statistics;
     ChartType           chartType;
 };

@@ -23,12 +23,6 @@ void FStatistics::refresh(const QString& directory)
     connect(_workerThread, &WorkerThread::resultReady, this, &FStatistics::getResult);
     connect(_workerThread, &WorkerThread::finished, _workerThread, &QObject::deleteLater);
     _workerThread->start();
-
-//    qDebug() << "Size: " << _all_stat.size();
-//    qDebug() << "Directories: " << _directoriesCounter;
-
-//    for (auto& it : _all_stat)
-//        qDebug() << it.first << " -> " << it.second.count;
 }
 
 statistics_map& FStatistics::getStatistics()
