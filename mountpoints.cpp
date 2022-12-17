@@ -39,7 +39,7 @@ volumes_list_t MountPoints::getNormalVolumes() const
 #ifdef Q_OS_WIN
      return (_mountedVolumes);
 #endif
-#if Q_OS_UNIX
+#ifdef Q_OS_UNIX
     volumes_list_t normalVolumes;
     foreach (QStorageInfo volume, _mountedVolumes)
     {
